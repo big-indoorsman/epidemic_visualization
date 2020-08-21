@@ -1,0 +1,1071 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+
+    <script type="text/javascript" src="{% static 'login/js/rem.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'login/css/style.css' %}">
+    <title>疫情可视化平台</title>
+</head>
+
+<body style="visibility: hidden;">
+    <div class="container-flex" tabindex="0" hidefocus="False">
+        <div class="box-left">
+            <div class="left-top">
+                <div class="current-num">
+                    <div><div class="form-group">
+
+			</div>
+                    </div>
+                </div>
+            </div>
+            <div class="left-center">
+                <div class="title-box">
+                    <h6>全国疫情情况</h6>
+                    <img  src="{% static '/login/image/line-blue.png'%}" alt="">
+                    <form action="/index/" method="get">
+                             {% csrf_token %}
+                            <input type="date" name="date" style="color:white;border: 0 none;outline-style: none;background: #163552" value="2020-03-01" />
+                        <input type="submit" style="color:white;border: 0 none;outline-style: none;background: #163552" value="搜索" >
+                         </form>
+                    </div>
+                <div class="chart-box pie-chart">
+                    <div id="map"></div>
+                    <div>
+                    </div>
+                </div>
+            </div>
+            <div class="left-bottom" class="select">
+                <div class="title-box">
+                    <h6>省份疫情情况</h6>
+
+                    <form action="/index/" method="post" id="test_form">
+                             {% csrf_token %}
+                        <input hidden type="text" id="s1" name="name" style="color:white;border: 0 none;outline-style: none;background: #163552" value=''/>
+                        <input hidden type="submit" style="color:white;border: 0 none;outline-style: none;background: #163552" value="搜索" >
+                         </form>
+                </div>
+                <div class="chart-box">
+                    <div id="gdMap" class="gd-map"></div>
+                </div>
+            </div>
+        </div>
+        <div class="box-center">
+            <div class="center-top">
+                <h1>疫情数据可视化平台</h1>
+            </div>
+            <div class="center-center">
+                <div class="weather-box">
+                    <div class="data">
+                        <p class="time" id="time">00:00:00</p>
+                        <p id="date"></p>
+                    </div>
+                    <div class="weather">
+                        <img id="weatherImg" src="{% static '/login/image/weather/weather_img01.png'%}" alt="">
+                        <div id="weather">
+                            <p class="active">多云</p>
+                            <p>16-22℃</p>
+                            <p>山西省吕梁市</p>
+                        </div>
+                    </div>
+                </div>
+                <img src="{% static '/login/image/line_bg.png'%}" alt="">
+                <div class="select-box">
+                    <ul id="barType">
+                        <li class="active" data-value="1">迁出</li>
+                        <li data-value="2">迁入</li>
+                    </ul>
+                    <div data-type="2">
+                        <div class="select" tabindex="0" hidefocus="true">
+                            <form action="/index/" method="get">
+                             {% csrf_token %}
+                            <input type="date" name="date" style="color:white;border: 0 none;outline-style: none;background: #162435" value="2020-02-01" />
+                        <input type="submit" style="color:white;border: 0 none;outline-style: none;background: #162435" value="搜索" >
+                         </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="center-bottom">
+                <div class="chart-box">
+                    <div id="chart4" style="width:100%;height:95%;"></div>
+                </div>
+                <div class="city-data">
+                    <div class="city-box">
+                    </div>
+                    <ul class="ranking-box">
+                        <li><span></span>
+                            <p>城市</p>
+                            <p>人流比例</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="box-right">
+            <div class="right-top">
+                <div class="title-box">
+                    <h6>新增人数折线图</h6>
+                </div>
+                <div class="chart-box">
+                    <div id="chart3" style="width:90%;height:85%;"></div>
+                </div>
+            </div>
+            <div class="right-center">
+                <div class="title-box">
+                    <p>词云图</p>
+                    <form action="/index/" method="get">
+                             {% csrf_token %}
+                            <input type="date" name="date" style="color:white;border: 0 none;outline-style: none;background: #163552" value="2020-06-01" />
+                            <input type="radio" name="in" /> 国内
+                            <input type="radio" name="out" /> 国外
+                            <input type="submit" style="color:white;border: 0 none;outline: none;background: #163552" value="搜索" >
+                         </form>
+
+                </div>
+                <div class="chart-box">
+                    <div id="chart6" style="width:90%;height:90%;"></div>
+                </div>
+
+            </div>
+            <div class="right-bottom">
+                <div class="title-box">
+                    <p id="switchBtn">疫情微博评论情绪分析</p>
+                </div>
+                <div class="chart-box">
+                        <div id="chart5" style="width:100%;height:90%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="{% static 'login/js/jquery-3.3.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/layer/layer.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/layer/laydate/laydate.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/echarts.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/china.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/data/guangdong.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/shanxi.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/hubei.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/shanxi1.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/hebei.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/beijing.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/aomen.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/chongqing.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/fujian.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/gansu.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/guangxi.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/hainan.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/heilongjiang.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/henan.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/hunan.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/jiangsu.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/jiangxi.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/jilin.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/liaoning.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/neimenggu.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/ningxia.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/qinghai.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/shandong.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/shanghai.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/gansu.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/shanxi1.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/sichuan.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/tianjin.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/shanghai.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/xianggang.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/xinjiang.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/xizang.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/yunnan.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/zhejiang.js' %}"></script>
+<script type="text/javascript" src="{% static 'login/js/echarts-wordcloud.js' %}"></script>
+<script type="text/javascript">
+    $.ajaxSetup({
+            data:{csrfmiddlewaretoken:'{{ csrf_token }}'}
+        });
+    $('document').ready(function () {
+        $("body").css('visibility', 'visible');
+        var localData = [$('#teacher').val(), $('#start').val() + '/' + $('#end').val(), $('#leader').val()];
+        localStorage.setItem("data", localData);
+        $('#conBtn').on('click', function () {
+            localData = [$('#teacher').val(), $('#start').val() + '/' + $('#end').val(), $('#leader').val()];
+            if (typeof (Storage) !== "undefined") {
+                localStorage.setItem("data", localData);
+                var arr = localStorage.getItem("data").split(',');
+                $('#name_a').html(arr[0]);
+                $('#date_a').html(arr[1]);
+                $('#lea_a').html(arr[2]);
+            }
+        });
+        $('#fangda').on('click', function () {
+            if ($(this).siblings('ul').is(":hidden")) {
+                $(this).addClass('active').siblings('ul').show();
+            } else {
+                $(this).removeClass('active').siblings('ul').hide();
+            }
+        });
+    });
+    function fnW(str) {
+    var num;
+    str >= 10 ? num = str : num = "0" + str;
+    return num;
+}
+//获取当前时间
+var timer = setInterval(function () {
+    var date = new Date();
+    var year = date.getFullYear(); //当前年份
+    var month = date.getMonth(); //当前月份
+    var data = date.getDate(); //天
+    var hours = date.getHours(); //小时
+    var minute = date.getMinutes(); //分
+    var second = date.getSeconds(); //秒
+    var day = date.getDay(); //获取当前星期几
+    var ampm = hours < 12 ? 'am' : 'pm';
+    $('#time').html(fnW(hours) + ":" + fnW(minute) + ":" + fnW(second));
+    $('#date').html('<span>' + year + '/' + (month + 1) + '/' + data + '</span><span>' + ampm + '</span><span>周' + day + '</span>')
+
+}, 1000);
+//页面地图数据
+var geoCoordMap = {
+    '海门': [121.15, 31.89],
+    '鄂尔多斯': [109.781327, 39.608266],
+    '招远': [120.38, 37.35],
+    '舟山': [122.207216, 29.985295],
+    '齐齐哈尔': [123.97, 47.33],
+    '盐城': [120.13, 33.38],
+    '赤峰': [118.87, 42.28],
+    '青岛': [120.33, 36.07],
+    '乳山': [121.52, 36.89],
+    '金昌': [102.188043, 38.520089],
+    '泉州': [118.58, 24.93],
+    '莱西': [120.53, 36.86],
+    '日照': [119.46, 35.42],
+    '胶南': [119.97, 35.88],
+    '南通': [121.05, 32.08],
+    '拉萨': [91.11, 29.97],
+    '云浮': [112.02, 22.93],
+    '梅州': [116.1, 24.55],
+    '文登': [122.05, 37.2],
+    '上海': [121.48, 31.22],
+    '攀枝花': [101.718637, 26.582347],
+    '威海': [122.1, 37.5],
+    '承德': [117.93, 40.97],
+    '厦门': [118.1, 24.46],
+    '汕尾': [115.375279, 22.786211],
+    '潮州': [116.63, 23.68],
+    '丹东': [124.37, 40.13],
+    '太仓': [121.1, 31.45],
+    '曲靖': [103.79, 25.51],
+    '烟台': [121.39, 37.52],
+    '福州': [119.3, 26.08],
+    '瓦房店': [121.979603, 39.627114],
+    '即墨': [120.45, 36.38],
+    '抚顺': [123.97, 41.97],
+    '玉溪': [102.52, 24.35],
+    '张家口': [114.87, 40.82],
+    '阳泉': [113.57, 37.85],
+    '莱州': [119.942327, 37.177017],
+    '湖州': [120.1, 30.86],
+    '汕头': [116.69, 23.39],
+    '昆山': [120.95, 31.39],
+    '宁波': [121.56, 29.86],
+    '湛江': [110.359377, 21.270708],
+    '揭阳': [116.35, 23.55],
+    '荣成': [122.41, 37.16],
+    '连云港': [119.16, 34.59],
+    '葫芦岛': [120.836932, 40.711052],
+    '常熟': [120.74, 31.64],
+    '东莞': [113.75, 23.04],
+    '河源': [114.68, 23.73],
+    '淮安': [119.15, 33.5],
+    '泰州': [119.9, 32.49],
+    '南宁': [108.33, 22.84],
+    '营口': [122.18, 40.65],
+    '惠州': [114.4, 23.09],
+    '江阴': [120.26, 31.91],
+    '蓬莱': [120.75, 37.8],
+    '韶关': [113.62, 24.84],
+    '嘉峪关': [98.289152, 39.77313],
+    '广州': [113.23, 23.16],
+    '延安': [109.47, 36.6],
+    '太原': [112.53, 37.87],
+    '清远': [113.01, 23.7],
+    '中山': [113.38, 22.52],
+    '昆明': [102.73, 25.04],
+    '寿光': [118.73, 36.86],
+    '盘锦': [122.070714, 41.119997],
+    '长治': [113.08, 36.18],
+    '深圳': [114.07, 22.62],
+    '珠海': [113.52, 22.3],
+    '宿迁': [118.3, 33.96],
+    '咸阳': [108.72, 34.36],
+    '铜川': [109.11, 35.09],
+    '平度': [119.97, 36.77],
+    '佛山': [113.11, 23.05],
+    '海口': [110.35, 20.02],
+    '江门': [113.06, 22.61],
+    '章丘': [117.53, 36.72],
+    '肇庆': [112.44, 23.05],
+    '大连': [121.62, 38.92],
+    '临汾': [111.5, 36.08],
+    '吴江': [120.63, 31.16],
+    '石嘴山': [106.39, 39.04],
+    '沈阳': [123.38, 41.8],
+    '苏州': [120.62, 31.32],
+    '茂名': [110.88, 21.68],
+    '嘉兴': [120.76, 30.77],
+    '长春': [125.35, 43.88],
+    '胶州': [120.03336, 36.264622],
+    '银川': [106.27, 38.47],
+    '张家港': [120.555821, 31.875428],
+    '三门峡': [111.19, 34.76],
+    '锦州': [121.15, 41.13],
+    '南昌': [115.89, 28.68],
+    '柳州': [109.4, 24.33],
+    '三亚': [109.511909, 18.252847],
+    '自贡': [104.778442, 29.33903],
+    '吉林': [126.57, 43.87],
+    '阳江': [111.95, 21.85],
+    '泸州': [105.39, 28.91],
+    '西宁': [101.74, 36.56],
+    '宜宾': [104.56, 29.77],
+    '呼和浩特': [111.65, 40.82],
+    '成都': [104.06, 30.67],
+    '大同': [113.3, 40.12],
+    '镇江': [119.44, 32.2],
+    '桂林': [110.28, 25.29],
+    '张家界': [110.479191, 29.117096],
+    '宜兴': [119.82, 31.36],
+    '北海': [109.12, 21.49],
+    '西安': [108.95, 34.27],
+    '金坛': [119.56, 31.74],
+    '东营': [118.49, 37.46],
+    '牡丹江': [129.58, 44.6],
+    '遵义': [106.9, 27.7],
+    '绍兴': [120.58, 30.01],
+    '扬州': [119.42, 32.39],
+    '常州': [119.95, 31.79],
+    '潍坊': [119.1, 36.62],
+    '重庆': [106.54, 29.59],
+    '台州': [121.420757, 28.656386],
+    '南京': [118.78, 32.04],
+    '滨州': [118.03, 37.36],
+    '贵阳': [106.71, 26.57],
+    '无锡': [120.29, 31.59],
+    '本溪': [123.73, 41.3],
+    '克拉玛依': [84.77, 45.59],
+    '渭南': [109.5, 34.52],
+    '马鞍山': [118.48, 31.56],
+    '宝鸡': [107.15, 34.38],
+    '焦作': [113.21, 35.24],
+    '句容': [119.16, 31.95],
+    '北京': [116.46, 39.92],
+    '徐州': [117.2, 34.26],
+    '衡水': [115.72, 37.72],
+    '包头': [110, 40.58],
+    '绵阳': [104.73, 31.48],
+    '乌鲁木齐': [87.68, 43.77],
+    '枣庄': [117.57, 34.86],
+    '杭州': [120.19, 30.26],
+    '淄博': [118.05, 36.78],
+    '鞍山': [122.85, 41.12],
+    '溧阳': [119.48, 31.43],
+    '库尔勒': [86.06, 41.68],
+    '安阳': [114.35, 36.1],
+    '开封': [114.35, 34.79],
+    '济南': [117, 36.65],
+    '德阳': [104.37, 31.13],
+    '温州': [120.65, 28.01],
+    '九江': [115.97, 29.71],
+    '邯郸': [114.47, 36.6],
+    '临安': [119.72, 30.23],
+    '兰州': [103.73, 36.03],
+    '沧州': [116.83, 38.33],
+    '临沂': [118.35, 35.05],
+    '南充': [106.110698, 30.837793],
+    '天津': [117.2, 39.13],
+    '富阳': [119.95, 30.07],
+    '泰安': [117.13, 36.18],
+    '诸暨': [120.23, 29.71],
+    '郑州': [113.65, 34.76],
+    '哈尔滨': [126.63, 45.75],
+    '聊城': [115.97, 36.45],
+    '芜湖': [118.38, 31.33],
+    '唐山': [118.02, 39.63],
+    '平顶山': [113.29, 33.75],
+    '邢台': [114.48, 37.05],
+    '德州': [116.29, 37.45],
+    '济宁': [116.59, 35.38],
+    '荆州': [112.239741, 30.335165],
+    '宜昌': [111.3, 30.7],
+    '义乌': [120.06, 29.32],
+    '丽水': [119.92, 28.45],
+    '洛阳': [112.44, 34.7],
+    '秦皇岛': [119.57, 39.95],
+    '株洲': [113.16, 27.83],
+    '石家庄': [114.48, 38.03],
+    '莱芜': [117.67, 36.19],
+    '常德': [111.69, 29.05],
+    '保定': [115.48, 38.85],
+    '湘潭': [112.91, 27.87],
+    '金华': [119.64, 29.12],
+    '岳阳': [113.09, 29.37],
+    '长沙': [113, 28.21],
+    '衢州': [118.88, 28.97],
+    '廊坊': [116.7, 39.53],
+    '菏泽': [115.480656, 35.23375],
+    '合肥': [117.27, 31.86],
+    '武汉': [114.31, 30.52],
+    '大庆': [125.03, 46.58],
+    '安徽省': [117.17, 31.52],
+    '北京市': [116.24, 39.55],
+    '重庆市': [106.54, 29.59],
+    '福建省': [119.18, 26.05],
+    '甘肃省': [103.51, 36.04],
+    '广东省': [113.14, 23.08],
+    '广西壮族自治区': [108.19, 22.48],
+    '贵州省': [106.42, 26.35],
+    '海南省': [110.20, 20.02],
+    '河北省': [114.30, 38.02],
+    '河南省': [113.40, 34.46],
+    '黑龙江省': [128.36, 45.44],
+    '湖北省': [112.27, 30.15],
+    '湖南省': [112.59, 28.12],
+    '吉林省': [125.19, 43.54],
+    '江苏省': [118.46, 32.03],
+    '江西省': [115.55, 28.40],
+    '辽宁省': [123.25, 41.48],
+    '内蒙古': [108.41, 40.48],
+    '内蒙古自治区': [108.41, 40.48],
+    '宁夏回族自治区': [106.16, 38.27],
+    '青海省': [101.48, 36.38],
+    '山东省': [118.00, 36.40],
+    '山西省': [112.33, 37.54],
+    '陕西省': [108.57, 34.17],
+    '上海市': [121.29, 31.14],
+    '海南': [108.77, 19.10],
+    '四川省': [104.04, 30.40],
+    '天津市': [117.12, 39.02],
+    '西藏自治区': [91.08, 29.39],
+    '新疆维吾尔自治区': [87.36, 43.45],
+    '云南省': [102.42, 25.04],
+    '浙江省': [120.10, 30.16],
+    '澳门特别行政区': [115.07, 21.33],
+    '台湾省': [121.21, 23.53],
+    '香港特别行政区': [114.1, 22.2]
+};
+
+$('.select').on('blur', function () {
+        $(this).find('.select-ul').hide();
+    });
+    //下拉框点击出现下拉框内容
+$('.select-div').on('click', function () {
+    if ($(this).siblings('.select-ul').is(":hidden")) {
+        $(this).siblings('.select-ul').show();
+    } else {
+        $(this).siblings('.select-ul').hide();
+    }
+});
+
+
+$('.select-ul').on('click', 'li', function () {
+    $(this).addClass('active').siblings('li').removeClass('active').parent().hide().siblings('.select-div').html($(this).html());
+    var parentDiv = $(this).parent().parent().parent();
+});
+
+//鼠标滑动到按钮，按钮内容变成白色
+var imgName;
+$('.title-box').children('button').hover(function () {
+    imgName = $(this).children('img').attr('src').split('.png')[0];
+    $(this).children('img').attr('src', imgName + '_on.png');
+}, function () {
+    $(this).children('img').attr('src', imgName + '.png');
+
+});
+
+
+var startColor = ['#0e94eb', '#c440ef', '#efb013', '#2fda07', '#d8ef13', '#2e4af8', '#0eebc4', '#f129b1', '#17defc', '#f86363'];
+var borderStartColor = ['#0077c5', '#a819d7', '#c99002', '#24bc00', '#b6cb04', '#112ee2', '#00bd9c', '#ce078f', '#00b2cd', '#ec3c3c'];
+
+
+function randomData() {
+     return Math.round(Math.random()*500);
+}
+function chart1() {
+var map_province={{ map_province|safe }};
+var map_confirm={{ map_confirm|safe }};
+var map_dead={{ map_dead|safe }};
+var map_heal={{ map_heal|safe }};
+var mydata = [];
+for (var i = 0; i < 34; i++) {
+       mydata.push({
+                        name:map_province[i],value:map_confirm[i]
+                    })
+    }
+var myChart = echarts.init(document.getElementById('map'));
+myChart.on('click', function (event) {
+    console.log(event['name']);
+    var province_data = event['name'];
+    document.getElementById('s1').value = province_data;
+    var form = document.getElementById('test_form');
+    form.submit();
+
+});
+    var option = {
+        tooltip: {
+                    formatter:function(params,ticket, callback){
+
+                        return params.name+'：'+params.value
+                    }
+                },
+                //左侧小导航图标
+                visualMap: {
+                    show : true,
+                    x: 'left',
+                    y: 'top',
+
+                    splitList: [
+                        {start: 0, end:10},{start: 10, end: 100},
+                        {start: 100, end: 1000},{start: 1000, end: 5000},
+                        {start: 5000, end: 10000},{start: 10000, end: 100000},
+                    ],
+                    color: ['#660208', '#8C0D0D', '#CC2929','#FF7B69', '#FFAA85', '#FFFFFF']
+                },
+
+                //配置属性
+                series: [{
+                    name: '数据',
+                    type: 'map',
+                    mapType: 'china',
+                    roam: true,
+                    itemStyle: {
+         normal: {
+             label: {
+                 show: false,
+                 formatter:'省份：{b}\n确诊：{c}',
+             },
+             borderWidth:0
+         },
+         emphasis: {
+             label: {
+                 show: false
+             },
+         }},
+                    data:mydata  //数据,
+                }]
+            };
+
+    myChart.setOption(option);
+}
+
+chart1();
+
+$('#filBtn').on('click', function () {
+        if ($('#filCon').is(":hidden")) {
+            $('#filCon').attr('style', 'display:flex');
+        } else {
+            $('#filCon').hide();
+        }
+    });
+    //点击筛选按钮end
+var myChart=echarts.init(document.getElementById("chart3"));
+var date={{ date|safe }};
+var confirm={{ confirm|safe }};
+var dead={{ dead|safe }};
+var heal={{ heal|safe }};
+    var option={
+         legend:{
+         x:'right',
+         y:'top',
+         padding:[0,50,0,0],
+         data:['确诊','死亡','治愈']
+        },
+        symbol:'star',
+        xAxis:{
+            data:date,
+            axisLine:{
+                                  lineStyle :{
+                                      color: '#CECECE'
+                                  }
+                                },
+        },
+        //y轴没有显式设置，根据值自动生成y轴
+        yAxis:{axisLine:{
+                                  lineStyle :{
+                                      color: '#CECECE'
+                                  }
+                                },
+         axisTick:{
+			                show:false
+			            },
+			            splitLine:{
+			                show:false
+			            }},
+        //数据-data是最终要显示的数据
+        series:[{
+            name:'确诊',
+            type:'line',
+            data:confirm
+        },
+        {
+            name:'死亡',
+            type:'line',
+            data:dead
+        },
+        {
+            name:'治愈',
+            type:'line',
+            data:heal
+        }],
+
+dataZoom: {
+    show: true,
+    realtime: false,
+    y: 240,
+    height: 15,
+    start: 20,
+    end: 80
+
+}
+
+    };
+myChart.setOption(option);
+
+function chart2(chartType) {
+    var name={{ name|safe}};
+    var city_name={{ city_name|safe }};
+    var city_confirm={{ city_confirm|safe }};
+    var data = [];
+    var index=city_name.length;
+    for (var i = 0; i < index; i++) {
+       data.push({
+                        name:city_name[i],value:city_confirm[i]
+                    })
+    }
+    var myChart = echarts.init(document.getElementById('gdMap'));
+        var option = {
+             visualMap: {
+                    show : true,
+                    x: 'left',
+                    y: 'top',
+
+                    splitList: [
+                        {start: 0, end:100},{start: 100, end: 1000},
+                        {start: 1000, end: 100000}
+                    ],
+                    color: ['#8C0D0D','#FF7B69', '#FFFFFF']
+                },
+            animation: true,
+            tooltip: {
+                show: true
+            },
+            series: [
+                {
+                    name: '数据名称',
+                    type: 'map',
+                    mapType: name,
+                    selectedMode: 'multiple',
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{b}<br/>{c} 人'
+                    },
+                    itemStyle: {
+                        normal: {
+                            borderWidth: 1,
+                            borderColor: '#0e94eb',
+                            label: {
+                                show: false
+                            }
+                        },
+                        emphasis: { // 也是选中样式
+                            borderWidth: 1,
+                            borderColor: '#fff',
+                            backgroundColor: 'red',
+                            label: {
+                                show: true,
+                                textStyle: {
+                                    color: '#fff'
+                                }
+                            }
+                        }
+                    },
+                    data: data,
+            }
+            ]
+        };
+
+        myChart.setOption(option);
+}
+chart2('');
+
+
+function addCityBtn(data) {
+    var li_con = '';
+    for (var i = 0; i < data.length; i++) {
+        li_con += '<li>' + data[i].name + '</li>'
+    }
+    $('#city').html(li_con);
+    $('#citys').html(li_con);
+}
+
+$('.city-btn').on('click', 'li', function () {
+    var str;
+    var patt = [/[a-z]/i, /[a-e]/i, /[f-i]/i, /[k-o]/i, /[p-t]/i, /[u-z]/i];
+    var index = $(this).index();
+    var li_con = '';
+    for (var i = 0; i < cityName.length; i++) {
+        str = cityName[i].firstP;
+        if (patt[index].test(str)) {
+            li_con += '<li>' + cityName[i].name + '</li>'
+        }
+    }
+
+});
+
+
+
+$("#barType").on('click', 'li', function () {
+    $(this).addClass('active').siblings('li').removeClass('active');
+    $('#tabBtn').data('state', $(this).data('value'));
+    chart4(chart4Data, $(this).data('value'), 0);
+});
+
+$("#barTypes").on('click', 'li', function () {
+    $(this).addClass('active').siblings('li').removeClass('active');
+    $('#tabBtns').data('state', $(this).data('value'));
+    chart4(chart4Data, $(this).data('value'), 1);
+
+});
+
+
+//chart4Data模拟数据
+var chart4Data = [];
+var ctx_data={{ ctx_date|safe }};
+var ctx_city={{ ctx_city|safe }};
+var ctx_province={{ ctx_province|safe }};
+for (var i = 0; i < 99; i++) {
+       chart4Data.push({
+                        'name':ctx_city[i],'value':ctx_data[i],'city':ctx_province[i]
+                    })
+    }
+
+
+var chart4Data1 = [];
+var cyx_data={{ cyx_date|safe }};
+var cyx_city={{ cyx_city|safe }};
+var cyx_province={{ cyx_province|safe }};
+for (var j = 0; j < 99; j++) {
+       chart4Data1.push({
+                        'name':cyx_city[j],'value':cyx_data[j],'city':cyx_province[j]
+                    })
+    }
+chart4(chart4Data1, 1, '');
+chart4(chart4Data, 1, '');
+function chart4(data, type, chartType) {
+    var str = '<li><span></span><p>城市</p><p>人流比例</p></li>';
+    for (var i = 0; i < 10; i++) {
+        j=Math.floor(Math.random() * 99);
+        str += '<li><span>' + (i + 1) + '</span><p>' + data[j].city + '</p><p>' + data[j].value + '</p></li>';
+    }
+
+    var s_data = [];
+    var myChart = echarts.init(document.getElementById('chart4'));
+    window.addEventListener('resize', function () {
+        myChart.resize();
+    });
+
+
+    function formtGCData(geoData, data, srcNam, dest) {
+        var tGeoDt = [];
+        if (dest) {
+            for (var i = 0, len = data.length; i < len; i++) {
+                if (srcNam != data[i].name) {
+                    tGeoDt.push({
+                        coords: [geoData[srcNam], geoData[data[i].name]],
+                    });
+                }
+            }
+        } else {
+            for (var i = 0, len = data.length; i < len; i++) {
+                if (srcNam != data[i].name) {
+                    tGeoDt.push({
+                        coords: [geoData[data[i].name], geoData[srcNam]],
+                    });
+                }
+            }
+        }
+        return tGeoDt;
+    }
+
+    function formtVData(geoData, data, srcNam) {
+        var tGeoDt = [];
+        for (var i = 0, len = data.length; i < len; i++) {
+            var tNam = data[i].name;
+            if (srcNam != tNam) {
+                tGeoDt.push({
+                    name: tNam,
+                    symbolSize: 4,
+                    itemStyle: {
+                        normal: {
+                            color: '#ffeb40',
+                        }
+                    },
+                    value: geoData[tNam]
+                });
+            }
+
+        }
+        tGeoDt.push({
+            name: srcNam,
+            value: geoData[srcNam],
+            symbolSize: 8,
+            itemStyle: {
+                normal: {
+                    color: '#2ef358',
+                }
+            }
+
+        });
+        return tGeoDt;
+    }
+
+    var planePath ='path://M1705.06,1318.313v-89.254l-319.9-221.799l0.073-208.063c0.521-84.662-26.629-121.796-63.961-121.491c-37.332-0.305-64.482,36.829-63.961,121.491l0.073,208.063l-319.9,221.799v89.254l330.343-157.288l12.238,241.308l-134.449,92.931l0.531,42.034l175.125-42.917l175.125,42.917l0.531-42.034l-134.449-92.931l12.238-241.308L1705.06,1318.313z';
+
+    if (type == 1) {
+        s_data.push({
+            type: 'lines',
+            zlevel: 2,
+            mapType: 'china',
+            symbol: 'pin',
+            effect: {
+                show: true,
+                period: 6,
+                //                color: '#ffeb40',
+                color: '#f38470',
+                symbol: planePath,
+                symbolSize: 8,
+                trailLength: 0.5
+
+            },
+            lineStyle: {
+                normal: {
+                    color: '#b488ef',
+                    width: 1,
+                    opacity: 0.4,
+                    curveness: 0.5
+                }
+            },
+            data: formtGCData(geoCoordMap, data, '湖北省', true)
+        })
+
+    } else if (type == 2) {
+        s_data.push({
+            type: 'lines',
+            zlevel: 2,
+            effect: {
+                show: true,
+                period: 6,
+                //                color: '#2ef358',
+                color: '#52b6ff',
+                symbol: planePath,
+                symbolSize: 6,
+                trailLength: 0.2
+            },
+            lineStyle: {
+                normal: {
+                    color: '#35ff99',
+                    width: 1,
+                    opacity: 0.4,
+                    curveness: 0.2
+                }
+            },
+            data: formtGCData(geoCoordMap, data, '湖北省', false)
+        }, {
+
+            type: 'effectScatter',
+            coordinateSystem: 'geo',
+            zlevel: 2,
+            rippleEffect: {
+                period: 4,
+                scale: 2.5,
+                brushType: 'stroke'
+            },
+            symbol: 'none',
+            symbolSize: 4,
+            itemStyle: {
+                normal: {
+                    color: '#fff'
+                }
+            },
+
+            data: formtVData(geoCoordMap, data, '湖北省')
+        })
+    }
+
+    var option = {
+        tooltip: {
+            trigger: 'item',
+        },
+        geo: {
+            map: 'china',
+            label: {
+                show: true,
+                position: 'insideLeft',
+                color: 'white',
+                fontSize: '10',
+                emphasis: {
+                    show: true
+                }
+            },
+            roam: true,
+            silent: true,
+            itemStyle: {
+                normal: {
+                    areaColor: 'transparent',
+                    borderColor: '#0e94eb',
+                    shadowBlur: 10,
+                    shadowColor: '#0e94ea'
+                }
+            },
+            left: 10,
+            right: 10
+        },
+        series: s_data
+    };
+    if (chartType === '') {
+        $('.ranking-box').html(str);
+        myChart.setOption(option);
+        myCharts.setOption(option);
+    } else if (chartType === 0) {
+        $('.center-bottom .ranking-box').html(str);
+        myChart.setOption(option);
+    } else if (chartType === 1) {
+        $('.pop-data .ranking-box').html(str);
+        myCharts.setOption(option);
+    }
+}
+
+$('.close-pop').on('click', function () {
+    $(this).parent().parent().hide().find('.cont-div').attr('style', 'visibility: hidden');
+});
+
+$('#setBtn').on('click', function () {
+    $('.container').attr('style', 'visibility: visible').find('.pop-up').eq(4).attr('style', 'visibility: visible').siblings().attr('style', 'visibility: hidden');
+
+});
+</script>
+<script>
+var chart = echarts.init(document.getElementById('chart5'));
+var topics={{ topic|safe }};
+var positive={{ positive|safe }};
+var negative={{ negative|safe }};
+var neutral={{ neutral|safe }};
+option = {
+    angleAxis: {
+    type: 'category',
+    data: ['话题一', '话题二', '话题三', '话题四', '话题五', '话题六'],
+    z: 10,
+    interval: 0,
+    },
+    radiusAxis: {
+    },
+    polar: {
+    },
+    series: [{
+    type: 'bar',
+    data: positive,
+    coordinateSystem: 'polar',
+    name: '积极',
+    stack: 'a'
+    }, {
+    type: 'bar',
+    data: neutral,
+    coordinateSystem: 'polar',
+    name: '中立',
+    stack: 'a'
+    }, {
+    type: 'bar',
+    data: negative,
+    coordinateSystem: 'polar',
+    name: '消极',
+    stack: 'a'
+    }],
+    legend: {
+    orient: 'vertical',
+    x:'right',
+    y:'top',
+    padding:[15,10,0,0],
+    show: true,
+    data: ['积极', '中立', '消极']
+    }
+    };
+
+chart.setOption(option);
+</script>
+
+<script>
+var mycharts = echarts.init(document.getElementById('chart6'));
+        //用来存储数据
+
+        var cy_num={{ cy_num|safe }};
+        var cy_comment={{ cy_comment|safe }};
+        var jsonlist = [];
+ for (var i = 0; i < cy_num.length; i++) {
+       jsonlist.push({
+                        name:cy_comment[i],value:parseInt(cy_num[i])*5
+                    })
+    }
+    // 人像的base64编码
+        image1="data:image/png;base64,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"
+        var maskResource = new Image();
+        maskResource.src=image1;
+        var option ={
+            //数据可以点击
+            tooltip:{
+
+            },
+
+            series:[
+                {
+                    maskImage:maskResource,
+                    //词的类型
+                    type: 'wordCloud',
+                    //设置字符大小范围
+                    sizeRange:[5,25],
+                    rotationRange:[-45,90],
+                    textStyle: {
+                        normal:{
+                            //生成随机的字体颜色
+                            color:function () {
+                                return 'rgb(' + [
+                                    Math.round(Math.random() * 160),
+                                    Math.round(Math.random() * 160),
+                                    Math.round(Math.random() * 160)
+                                ].join(',')+')';
+
+                            }
+                        }
+
+                    },
+                    //不要忘记调用数据
+                       data:jsonlist
+
+                 }
+            ]
+
+        };
+        //加载图像，将数据放在图像中
+        maskResource.onload = function(){
+            mycharts.setOption(option)
+
+            };
+
+
+</script>
+
+</html>
